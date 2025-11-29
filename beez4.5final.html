@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyBee – Student Task Tracker</title>
+
+<style>
+/* COLORS & VARS */
+:root{
+  --bee-yellow:#fbbc04;
+  --bee-dark:#1f1f1f;
+  --bee-light:#ffffff;
+  --card-bg:#fff8e7;
+  --shadow:0 6px 18px rgba(0,0,0,0.12);
+  --radius:14px;
+  --muted: #6b6b6b;
+}
+
+/* DARK THEME */
+body.dark {
+  --bee-dark: #eaeaea;
+  --card-bg: #1f1f23;
+  --shadow: 0 6px 18px rgba(0,0,0,0.6);
+  background: linear-gradient(135deg,#1b1b1b 0%, #111 100%);
+  color: var(--bee-dark);
+}
+
+/* PAGE BACKGROUND (HONEY GRADIENT) */
+body{
+  margin:0;
+  padding:18px;
+  font-family:"Poppins",system-ui,Segoe UI,Roboto,Arial;
+  background: linear-gradient(135deg,#fff9d9 0%,#ffe793 35%,#fbd55b 70%,#fbcf3a 100%);
+  color:var(--bee-dark);
+  display:flex;
+  justify-content:center;
+  min-height:100vh;
+  background-attachment: fixed;
+}
+
+/* WRAPPER */
+.app{
+  width:100%;
+  max-width:1100px;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+.logo{ display:flex; align-items:center; gap:12px; }
+
+.bee{
+  width:56px; height:56px;
+  border-radius:50%;
+  background:var(--bee-yellow);
+  display:flex; justify-content:center; align-items:center;
+  font-size:30px;
+  box-shadow:var(--shadow);
+}
+
+.title-group h1{ margin:0; font-size:22px; font-weight:700; }
+.subtitle{ font-size:13px; color:var(--muted); }
+
+/* header controls */
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* clock */
+.clock{
+  background:rgba(255,255,255,0.7);
+  padding:8px 12px;
+  border-radius:12px;
+  font-weight:600;
+}
+
+/* dark mode button */
+.toggle {
+  background:none;
+  border:2px solid rgba(0,0,0,0.08);
+  padding:8px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:16px;
+  align-items:start;
+}
+
+@media (max-width:920px){
+  .grid{ grid-template-columns:1fr; }
+}
+
+/* CARDS */
+.card{
+  background:var(--card-bg);
+  padding:18px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+
+/* INPUTS */
+input,select,textarea{
+  width:100%;
+  padding:10px;
+  border-radius:12px;
+  border:2px solid #ffe8a1;
+  font-size:14px;
+  background:white;
+  box-sizing:border-box;
+}
+
+body.dark input, body.dark textarea, body.dark select {
+  background:#0f0f12;
+  color:var(--bee-dark);
+  border-color: rgba(255,255,255,0.06);
+}
+
+textarea{ min-height:80px; }
+
+/* FORM ROW */
+.form-row{
+  display:flex;
+  gap:10px;
+}
+.form-row > * { flex:1; }
+
+@media(max-width:520px){
+  .form-row{ flex-direction:column; }
+}
+
+/* TASK CARD */
+.task{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  border-left:6px solid var(--bee-yellow);
+  margin-bottom:14px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+body.dark .task { background:#111; box-shadow: 0 6px 14px rgba(0,0,0,0.6); border-left-color: #f5d06a; }
+
+.task h3{ margin:0; }
+
+/* BADGES */
+.badge{
+  padding:6px 10px;
+  font-size:12px;
+  border-radius:999px;
+  font-weight:700;
+}
+.low{ background:#d9fdd3; color:#327a22; }
+.medium{ background:#fff4cc; color:#967100; }
+.high{ background:#ffd1cf; color:#9d1712; }
+
+/* BUTTONS - Bee (yellow) */
+.btn{
+  background:var(--bee-yellow);
+  border:none;
+  border-radius:12px;
+  padding:10px 16px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* ACTION BUTTONS - Black (chosen style 2) */
+.actions{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  flex-wrap:wrap;
+}
+
+.action-btn{
+  background:black;
+  color:white;
+  border:none;
+  padding:7px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:700;
+}
+
+/* Small label */
+.label-small{
+  font-size:12px;
+  margin-bottom:6px;
+  color:var(--muted);
+}
+
+/* PROGRESS BAR */
+.progress-box{ margin-top:12px; }
+.progress-label{ font-size:14px; font-weight:600; margin-bottom:6px; }
+.progress-bar{ width:100%; background:#ffe8a1; height:14px; border-radius:20px; overflow:hidden; }
+.progress-fill{ height:100%; width:0%; background:#fbbc04; transition:width 0.4s ease; }
+.progress-percent{ margin-top:6px; font-size:14px; font-weight:600; }
+
+/* DASHBOARD STATS */
+.stats {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+.stat {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background: rgba(255,255,255,0.6);
+  padding:8px;
+  border-radius:10px;
+}
+body.dark .stat { background: rgba(255,255,255,0.03); }
+
+/* MINI CALENDAR */
+.calendar {
+  margin-top:12px;
+  user-select:none;
+}
+.cal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.cal-grid{
+  display:grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap:6px;
+  margin-top:8px;
+}
+.cal-day{
+  padding:8px;
+  background:rgba(255,255,255,0.6);
+  text-align:center;
+  border-radius:8px;
+  font-size:13px;
+  cursor:pointer;
+}
+.cal-day:hover{ transform:translateY(-2px); transition:transform .12s; }
+.cal-day.hasTask{ box-shadow: inset 0 -4px 0 rgba(0,0,0,0.06); }
+.cal-day.selected{ outline:3px solid rgba(0,0,0,0.08); transform:scale(1.03); }
+
+body.dark .cal-day { background: rgba(255,255,255,0.03); color:var(--bee-dark); }
+body.dark .cal-day.selected { outline:3px solid rgba(255,255,255,0.06); }
+
+/* SORT SELECT */
+.sort-row { margin-top:12px; display:flex; gap:8px; align-items:center; }
+
+/* small text */
+.small { font-size:13px; color:var(--muted); margin:4px 0; }
+
+@media (max-width:560px){
+  .calendar .cal-day{ padding:6px; font-size:12px; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header>
+  <div class="logo">
+    <div class="bee" aria-hidden>🐝</div>
+    <div class="title-group">
+      <h1>StudyBee</h1>
+      <div class="subtitle">Smart student task tracker</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div id="clock" class="clock" aria-live="polite">--:--:--</div>
+    <button id="darkToggle" class="toggle" title="Toggle dark mode">🌙</button>
+    <button class="btn" onclick="scrollToForm()">+ Add Task</button>
+  </div>
+</header>
+
+<div class="grid">
+
+  <!-- SIDEBAR -->
+  <aside class="card">
+    <h3>Overview</h3>
+    <p>Total tasks: <b id="totalTasks">0</b></p>
+    <p>Completed: <b id="doneTasks">0</b></p>
+
+    <!-- Progress -->
+    <div class="progress-box">
+      <div class="progress-label">Progress</div>
+      <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+      <div id="progressPercent" class="progress-percent">0%</div>
+    </div>
+
+    <!-- Dashboard stats -->
+    <div class="stats">
+      <div class="stat"><span>In Progress</span><strong id="statProgress">0</strong></div>
+      <div class="stat"><span>Overdue</span><strong id="statOverdue">0</strong></div>
+      <div class="stat"><span>Reminders</span><strong id="statReminders">0</strong></div>
+      <div class="stat"><span>High / Medium / Low</span>
+        <small id="statPriority">0 / 0 / 0</small>
+      </div>
+    </div>
+
+    <!-- Mini calendar -->
+    <div class="calendar card" id="calendarCard" style="margin-top:14px;">
+      <div class="cal-header">
+        <button class="toggle" id="prevMonth">&lt;</button>
+        <div id="calTitle" style="font-weight:700"></div>
+        <button class="toggle" id="nextMonth">&gt;</button>
+      </div>
+      <div class="cal-grid" id="calGrid">
+        <!-- days populate here -->
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px;">
+        <button class="btn" id="clearDateFilter">Clear date filter</button>
+      </div>
+    </div>
+
+    <!-- Search & Sort -->
+    <h3 style="margin-top:16px;">Search</h3>
+    <input id="search" placeholder="Search..." oninput="renderTasks()">
+
+    <div class="sort-row">
+      <label class="small">Sort</label>
+      <select id="sortSelect" onchange="renderTasks()">
+        <option value="none">None</option>
+        <option value="dueAsc">Due date ↑</option>
+        <option value="dueDesc">Due date ↓</option>
+        <option value="priority">Priority (High → Low)</option>
+        <option value="status">Status (ToDo→Done)</option>
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+      </select>
+    </div>
+
+    <h3 style="margin-top:12px;">Filters</h3>
+    <select id="priorityFilter" onchange="renderTasks()">
+      <option value="all">All priority</option>
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+
+    <select id="statusFilter" onchange="renderTasks()" style="margin-top:10px;">
+      <option value="all">All status</option>
+      <option value="todo">To Do</option>
+      <option value="progress">In Progress</option>
+      <option value="done">Done</option>
+    </select>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="card" id="formCard">
+      <h2>Add / Edit Task</h2>
+
+      <input type="hidden" id="taskId">
+
+      <div class="form-row">
+        <input id="title" placeholder="Task title">
+        <input id="subject" placeholder="Subject">
+      </div>
+
+      <div class="form-row" style="margin-top:10px;">
+        <select id="priority">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+
+        <select id="status">
+          <option value="todo">To Do</option>
+          <option value="progress">In Progress</option>
+          <option value="done">Done</option>
+        </select>
+
+        <div>
+          <label class="label-small">Due date</label>
+          <input type="date" id="dueDate">
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:10px;">
+        <div>
+          <label class="label-small">Due time</label>
+          <input type="time" id="dueTime">
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" id="reminder">
+          <label>Reminder</label>
+        </div>
+      </div>
+
+      <textarea id="description" placeholder="Description..." style="margin-top:10px;"></textarea>
+
+      <button class="btn" style="margin-top:12px;" onclick="saveTask()">Save Task</button>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2>Your Tasks</h2>
+      <div id="taskList"></div>
+    </div>
+
+  </main>
+</div>
+
+</div>
+
+<script>
+/* ---------------------------
+   Utilities / State
+   --------------------------- */
+let tasks = JSON.parse(localStorage.getItem("studyBeeTasks") || "[]");
+let selectedDateFilter = null; // 'YYYY-MM-DD' or null
+
+/* CLOCK */
+function formatTime(d){
+  let h=d.getHours(), m=d.getMinutes(), s=d.getSeconds();
+  const ampm = h >= 12 ? "PM":"AM";
+  h = h % 12 || 12;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")} ${ampm}`;
+}
+function startClock(){
+  const c = document.getElementById("clock");
+  function tick(){ c.textContent = formatTime(new Date()); }
+  tick(); setInterval(tick,1000);
+}
+startClock();
+
+/* DARK MODE */
+const darkToggle = document.getElementById("darkToggle");
+function applyDarkMode(on){
+  if(on) document.body.classList.add("dark");
+  else document.body.classList.remove("dark");
+  localStorage.setItem("studyBeeDark", on ? "1" : "0");
+  darkToggle.textContent = on ? "☀️" : "🌙";
+}
+darkToggle.addEventListener("click", ()=>{
+  const on = !document.body.classList.contains("dark");
+  applyDarkMode(on);
+});
+(function(){
+  const saved = localStorage.getItem("studyBeeDark");
+  applyDarkMode(saved === "1");
+})();
+
+/* Save helper */
+function saveTasksToStorage(){
+  localStorage.setItem("studyBeeTasks", JSON.stringify(tasks));
+}
+
+/* Scroll to form */
+function scrollToForm(){ document.getElementById("formCard").scrollIntoView({behavior:"smooth"}); }
+
+/* ---------------------------
+   Task CRUD
+   --------------------------- */
+function saveTask(){
+  const id = document.getElementById("taskId").value || Date.now().toString();
+  const t = {
+    id,
+    title: document.getElementById("title").value.trim(),
+    subject: document.getElementById("subject").value.trim(),
+    priority: document.getElementById("priority").value,
+    status: document.getElementById("status").value,
+    dueDate: document.getElementById("dueDate").value || null,
+    dueTime: document.getElementById("dueTime").value || null,
+    reminder: !!document.getElementById("reminder").checked,
+    description: document.getElementById("description").value.trim(),
+    createdAt: Date.now()
+  };
+
+  if(!t.title){
+    alert("Please enter a title.");
+    return;
+  }
+
+  const existing = tasks.find(x=>x.id===id);
+  if(existing){ Object.assign(existing, t); }
+  else{ tasks.push(t); }
+
+  saveTasksToStorage();
+  clearForm();
+  renderTasks();
+}
+
+function clearForm(){
+  document.getElementById("taskId").value="";
+  document.getElementById("title").value="";
+  document.getElementById("subject").value="";
+  document.getElementById("priority").value="medium";
+  document.getElementById("status").value="todo";
+  document.getElementById("dueDate").value="";
+  document.getElementById("dueTime").value="";
+  document.getElementById("reminder").checked=false;
+  document.getElementById("description").value="";
+}
+
+function editTask(id){
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  document.getElementById("taskId").value = t.id;
+  document.getElementById("title").value = t.title;
+  document.getElementById("subject").value = t.subject;
+  document.getElementById("priority").value = t.priority;
+  document.getElementById("status").value = t.status;
+  document.getElementById("dueDate").value = t.dueDate || "";
+  document.getElementById("dueTime").value = t.dueTime || "";
+  document.getElementById("reminder").checked = !!t.reminder;
+  document.getElementById("description").value = t.description || "";
+  scrollToForm();
+}
+
+function deleteTask(id){
+  if(!confirm("Delete task?")) return;
+  tasks = tasks.filter(t => t.id !== id);
+  saveTasksToStorage();
+  renderTasks();
+}
+
+/* ---------------------------
+   Mark Done / Mark To-Do (Style 2: black buttons)
+   --------------------------- */
+function markDone(id){
+  const t = tasks.find(x => x.id === id);
+  if(!t) return;
+  t.status = "done";
+  // optionally disable reminder once done:
+  // t.reminder = false;
+  saveTasksToStorage();
+  renderTasks();
+}
+
+function markTodo(id){
+  const t = tasks.find(x => x.id === id);
+  if(!t) return;
+  t.status = "todo";
+  saveTasksToStorage();
+  renderTasks();
+}
+
+/* ---------------------------
+   Helpers: Dates & Overdue
+   --------------------------- */
+function todayISO(){
+  return new Date().toISOString().split("T")[0];
+}
+function isOverdue(task){
+  if(!task.dueDate) return false;
+  const now = todayISO();
+  return task.dueDate < now && task.status !== "done";
+}
+
+/* ---------------------------
+   Progress & Dashboard
+   --------------------------- */
+function updateProgressAndStats(){
+  const total = tasks.length;
+  const done = tasks.filter(t => t.status === "done").length;
+  const inProgress = tasks.filter(t => t.status === "progress").length;
+  const overdue = tasks.filter(t => isOverdue(t)).length;
+  const reminders = tasks.filter(t => t.reminder).length;
+  const high = tasks.filter(t => t.priority === "high").length;
+  const medium = tasks.filter(t => t.priority === "medium").length;
+  const low = tasks.filter(t => t.priority === "low").length;
+
+  const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+  document.getElementById("totalTasks").textContent = total;
+  document.getElementById("doneTasks").textContent = done;
+  document.getElementById("statProgress").textContent = inProgress;
+  document.getElementById("statOverdue").textContent = overdue;
+  document.getElementById("statReminders").textContent = reminders;
+  document.getElementById("statPriority").textContent = `${high} / ${medium} / ${low}`;
+
+  document.getElementById("progressPercent").textContent = percent + "%";
+  document.getElementById("progressFill").style.width = percent + "%";
+}
+
+/* ---------------------------
+   Sorting & Filtering
+   --------------------------- */
+function sortTasksArray(arr){
+  const sort = document.getElementById("sortSelect").value;
+  const copy = arr.slice();
+  if(sort === "dueAsc"){
+    copy.sort((a,b)=>{
+      if(!a.dueDate) return 1;
+      if(!b.dueDate) return -1;
+      return a.dueDate.localeCompare(b.dueDate);
+    });
+  } else if(sort === "dueDesc"){
+    copy.sort((a,b)=>{
+      if(!a.dueDate) return 1;
+      if(!b.dueDate) return -1;
+      return b.dueDate.localeCompare(a.dueDate);
+    });
+  } else if(sort === "priority"){
+    const map = { high: 0, medium:1, low:2 };
+    copy.sort((a,b)=> (map[a.priority]||3) - (map[b.priority]||3));
+  } else if(sort === "status"){
+    const map = { todo:0, progress:1, done:2 };
+    copy.sort((a,b)=> (map[a.status]||3) - (map[b.status]||3));
+  } else if(sort === "newest"){
+    copy.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
+  } else if(sort === "oldest"){
+    copy.sort((a,b)=> (a.createdAt||0) - (b.createdAt||0));
+  }
+  return copy;
+}
+
+/* ---------------------------
+   Calendar (mini)
+   --------------------------- */
+let calDate = new Date(); // shows current month
+function renderCalendar(){
+  const grid = document.getElementById("calGrid");
+  grid.innerHTML = "";
+  const year = calDate.getFullYear();
+  const month = calDate.getMonth();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const startWeekday = first.getDay(); // 0-6 Sun-Sat
+  const daysInMonth = last.getDate();
+
+  document.getElementById("calTitle").textContent = first.toLocaleString(undefined, { month: "long", year: "numeric" });
+
+  // pad blanks for first week
+  for(let i=0;i<startWeekday;i++){
+    const el = document.createElement("div");
+    el.className = "cal-day";
+    el.style.visibility = "hidden";
+    grid.appendChild(el);
+  }
+
+  // create day boxes
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = new Date(year, month, d).toISOString().split("T")[0];
+    const el = document.createElement("div");
+    el.className = "cal-day";
+    el.textContent = d;
+
+    // if tasks exist that day -> highlight
+    const has = tasks.some(t => t.dueDate === iso && t.status !== "done");
+    if(has) el.classList.add("hasTask");
+
+    // selected highlight
+    if(selectedDateFilter === iso) el.classList.add("selected");
+
+    el.addEventListener("click", ()=>{
+      if(selectedDateFilter === iso){
+        selectedDateFilter = null;
+      } else {
+        selectedDateFilter = iso;
+      }
+      renderTasks();
+      renderCalendar();
+    });
+
+    grid.appendChild(el);
+  }
+}
+
+/* prev/next month */
+document.getElementById("prevMonth").addEventListener("click", ()=>{
+  calDate.setMonth(calDate.getMonth() - 1);
+  renderCalendar();
+});
+document.getElementById("nextMonth").addEventListener("click", ()=>{
+  calDate.setMonth(calDate.getMonth() + 1);
+  renderCalendar();
+});
+document.getElementById("clearDateFilter").addEventListener("click", ()=>{
+  selectedDateFilter = null; renderTasks(); renderCalendar();
+});
+
+/* ---------------------------
+   Render tasks list
+   --------------------------- */
+function renderTasks(){
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+
+  const s = (document.getElementById("search").value || "").toLowerCase();
+  const pf = document.getElementById("priorityFilter").value;
+  const sf = document.getElementById("statusFilter").value;
+
+  let filtered = tasks.filter(t=>{
+    const matchSearch = !s || (t.title && t.title.toLowerCase().includes(s)) || (t.subject && t.subject.toLowerCase().includes(s));
+    const matchPriority = pf === "all" || t.priority === pf;
+    const matchStatus = sf === "all" || t.status === sf;
+    const matchDate = !selectedDateFilter || t.dueDate === selectedDateFilter;
+    return matchSearch && matchPriority && matchStatus && matchDate;
+  });
+
+  // apply sorting to filtered array
+  filtered = sortTasksArray(filtered);
+
+  // stats & progress first (based on all tasks)
+  updateProgressAndStats();
+  renderCalendar();
+
+  if(filtered.length === 0){
+    list.innerHTML = "<p class='small'>No matching tasks… 🐝</p>";
+    return;
+  }
+
+  filtered.forEach(t=>{
+    const div = document.createElement("div");
+    div.className = "task";
+
+    const due = t.dueDate ? t.dueDate + (t.dueTime ? " • " + t.dueTime : "") : "—";
+    const overdueText = isOverdue(t) ? " (OVERDUE)" : "";
+
+    // actions: style 2 -> black buttons; include Mark Done / Mark To-Do above Edit/Delete
+    const actionButtons = t.status !== "done"
+      ? `<button class="action-btn" onclick="markDone('${t.id}')">✔ Mark Done</button>`
+      : `<button class="action-btn" onclick="markTodo('${t.id}')">⟳ Mark To-Do</button>`;
+
+    div.innerHTML = `
+      <h3>${escapeHtml(t.title)}</h3>
+      <div class="small">Subject: <b>${escapeHtml(t.subject || "—")}</b></div>
+      <div class="small">Due: <b>${escapeHtml(due)}${overdueText}</b></div>
+      <div class="small">Status: <b>${escapeHtml(t.status)}</b></div>
+      <div style="margin-top:6px;">
+        <span class="badge ${t.priority}">${escapeHtml(t.priority.toUpperCase())}</span>
+        ${t.reminder ? "<span style='margin-left:10px;color:#c76b04;font-weight:700;'>⏰ Reminder</span>":""}
+      </div>
+      <p class="small" style="margin-top:8px;">${escapeHtml(t.description || "")}</p>
+      <div class="actions">
+        ${actionButtons}
+        <button class="action-btn" onclick="editTask('${t.id}')">Edit</button>
+        <button class="action-btn" onclick="deleteTask('${t.id}')">Delete</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* small escape */
+function escapeHtml(str){
+  return String(str || "").replace(/[&<>"']/g, function(m){
+    return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]);
+  });
+}
+
+/* initial render */
+renderTasks();
+
+/* Keep calendar in sync when tasks change via storage (in case user opens multiple tabs) */
+window.addEventListener("storage", (e)=>{
+  if(e.key === "studyBeeTasks"){
+    tasks = JSON.parse(localStorage.getItem("studyBeeTasks") || "[]");
+    renderTasks();
+  }
+});
+
+/* Optional: Reminder checker (alerts when task due exactly at time) */
+/* This is simple and uses alert; because of browser limitations, real push notifications require service workers. */
+setInterval(()=>{
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+  const hhmm = now.toTimeString().slice(0,5); // "HH:MM"
+  let changed = false;
+  tasks.forEach(t=>{
+    if(t.reminder && t.dueDate === today && t.dueTime === hhmm){
+      alert("🐝 StudyBee reminder: \"" + (t.title || "Task") + "\" is due now.");
+      t.reminder = false;
+      changed = true;
+    }
+  });
+  if(changed){ saveTasksToStorage(); renderTasks(); }
+}, 30000);
+
+</script>
+</body>
+</html>
